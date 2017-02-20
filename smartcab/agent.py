@@ -56,7 +56,8 @@ class LearningAgent(Agent):
         else:
             #print "Just called reset"
             #self.epsilon = self.alpha**self.trialCounter
-            self.epsilon = self.epsilon - 0.04
+            self.epsilon = self.epsilon - 0.01
+            #self.epsilon = 1.0/(self.trialCounter**2)
             #self.epsilon = math.cos(self.alpha * self.trialCounter)
             #print "new epsilon", self.epsilon
             print "Learned Q-table", self.Q
@@ -79,7 +80,7 @@ class LearningAgent(Agent):
         ###########
         # Set 'state' as a tuple of relevant data for the agent        
         #state = (waypoint, inputs['light'], inputs['left'], inputs['right'], inputs['oncoming'])
-        state = (waypoint, inputs['light'], inputs['left'], inputs['right'], inputs['oncoming'])
+        state = (waypoint, inputs['light'], inputs['left'], inputs['oncoming'])
 
         print state
 
@@ -96,11 +97,14 @@ class LearningAgent(Agent):
         # Calculate the maximum Q-value of all actions for a given state
 
 
-        actionDict = self.Q[state]
-        whichActionHighest = max(actionDict.iterkeys(), key=(lambda key: actionDict[key]))
-        max_Q_value = actionDict[whichActionHighest]
+        actionsForThisState = self.Q[state]
+        #whichActionHighestQValue = max(actionsForThisState.iterkeys(), key=(lambda key: actionsForThisState[key]))
+        getmax = sorted(actionsForThisState.keys(), key=actionsForThisState.get, reverse=True)[0]
+        maxValue = actionsForThisState[getmax]
 
-        return max_Q_value 
+        #max_Q_value = actionsForThisState[whichActionHighestQValue]
+
+        return maxValue
 
     def get_max_Q_action(self, state):
 
@@ -181,25 +185,12 @@ class LearningAgent(Agent):
         ###########
         # When learning, implement the value iteration update rule
         #   Use only the learning rate 'alpha' (do not use the discount factor 'gamma')
+        
         if self.learning == True:
-            try: 
-                lastState = self.statesHistory[len(self.statesHistory)-1]
-                lastAction = self.actionsHistory[len(self.actionsHistory)-1]
-            except:
-                "There is no previous state"
-            else:
-
-                actionsForLastState = self.Q[lastState] #dictionary of action and values
-                lastStateActionValue = actionsForLastState[lastAction]
-
-                maxQ = self.get_max_Q_value(state)
-
-                lastStateActionValue = lastStateActionValue + (self.alpha * (reward + maxQ - lastStateActionValue))
-
-                actionsForLastState[lastAction] = lastStateActionValue
-                self.Q[lastState] = actionsForLastState
-
-                #print "new state: ", self.Q, "\n\n"
+            justCompletedStateAction = self.Q[state][action]
+            self.Q[state][action] = reward*self.alpha + justCompletedStateAction*(1 - self.alpha)
+            #discount = 0.0
+            #self.Q[state][action] = justCompletedStateAction + self.alpha * (reward - justCompletedStateAction)
 
         return
 
@@ -240,7 +231,7 @@ def run():
     #   learning   - set to True to force the driving agent to use Q-learning
     #    * epsilon - continuous value for the exploration factor, default is 1
     #    * alpha   - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent, learning = True, epsilon = 1.0, alpha = 0.80)
+    agent = env.create_agent(LearningAgent, learning = True, epsilon = 1.0, alpha = 0.50)
     
     ##############
     # Follow the driving agent
@@ -262,7 +253,7 @@ def run():
     # Flags:
     #   tolerance  - epsilon tolerance before beginning testing, default is 0.05 
     #   n_test     - discrete number of testing trials to perform, default is 0
-    sim.run(n_test = 10, tolerance = 0.01)
+    sim.run(n_test = 10, tolerance = 0.001)
 
 
 if __name__ == '__main__':
