@@ -56,9 +56,11 @@ class LearningAgent(Agent):
         else:
             #print "Just called reset"
             #self.epsilon = self.alpha**self.trialCounter
+            
             self.epsilon = self.epsilon - 0.01
+
             #self.epsilon = 1.0/(self.trialCounter**2)
-            #self.epsilon = math.cos(self.alpha * self.trialCounter)
+            #self.epsilon = math.e**(-1*self.alpha*self.trialCounter)
             #print "new epsilon", self.epsilon
             print "Learned Q-table", self.Q
         
@@ -231,7 +233,7 @@ def run():
     #   learning   - set to True to force the driving agent to use Q-learning
     #    * epsilon - continuous value for the exploration factor, default is 1
     #    * alpha   - continuous value for the learning rate, default is 0.5
-    agent = env.create_agent(LearningAgent, learning = True, epsilon = 1.0, alpha = 0.50)
+    agent = env.create_agent(LearningAgent, learning = True, epsilon = 1.0, alpha = 0.25)
     
     ##############
     # Follow the driving agent
@@ -246,7 +248,7 @@ def run():
     #   display      - set to False to disable the GUI if PyGame is enabled
     #   log_metrics  - set to True to log trial and simulation results to /logs
     #   optimized    - set to True to change the default log file name
-    sim = Simulator(env, update_delay = 0.001, log_metrics = True, optimized = True, display = False)
+    sim = Simulator(env, update_delay = 0.0001, log_metrics = True, optimized = True, display = False)
     
     ##############
     # Run the simulator
